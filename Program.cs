@@ -4,17 +4,11 @@ using System.Net.Sockets;
 using System.Net;
 using System.Text;
 
-
-Message message = new Message() { Text = "Wake up", Date_Time = DateTime.UtcNow, Username_from = "Morpheus", Username_to = "Neo"};
-string json = message.MessageToJson();
-Console.WriteLine(json);
-Message? msd_deser =  Message.JsonToMessage(json);
-
 void SentMessage(string text)
 {
     using (Socket listner = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
     {
-        var remote_endpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1234);
+        var remote_endpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 12345);
         listner.Blocking = true;
         listner.Bind(remote_endpoint);
         listner.Listen(1000);
@@ -29,7 +23,7 @@ class ServerSend
 {
     public static void Server(string text)
     {
-        UdpClient client = new UdpClient();
+        UdpClient client = new UdpClient(1223);
         IPEndPoint point = new IPEndPoint(IPAddress.Any, 0);
         Console.WriteLine("Server is waiting for a message");
         while (true)
@@ -37,8 +31,7 @@ class ServerSend
             byte[] buffer = client.Receive(ref  point);
             string message_str = Encoding.UTF8.GetString(buffer);
             Message? message = Message.JsonToMessage(message_str);
-            Console.WriteLine($"Received a message from {message?.Username_from}\n{message?.Text}\n{message?.Date_Time}");
-
+            message.PrintConsole();
         }
     }
 }
@@ -72,5 +65,6 @@ class Message
 
     public string MessageToJson() => JsonSerializer.Serialize(this);
     public static Message? JsonToMessage(string message) => JsonSerializer.Deserialize<Message>(message);
-
+    public void PrintConsole() => Console.WriteLine(ToString());
+    public override string ToString() => $"Received a message from {Username_from}\n{Text}\n{Date_Time}";
 }
