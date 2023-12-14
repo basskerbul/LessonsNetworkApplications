@@ -3,6 +3,10 @@ using System.Reflection.Metadata.Ecma335;
 using System.Net.Sockets;
 using System.Net;
 using System.Text;
+using System;
+
+
+
 
 void SentMessage(string text)
 {
@@ -25,13 +29,19 @@ class ServerSend
     {
         UdpClient client = new UdpClient(1223);
         IPEndPoint point = new IPEndPoint(IPAddress.Any, 0);
-        Console.WriteLine("Server is waiting for a message");
+        Console.WriteLine("I listen");
+        
         while (true)
         {
-            byte[] buffer = client.Receive(ref  point);
+            byte[] buffer = client.Receive(ref point);
             string message_str = Encoding.UTF8.GetString(buffer);
-            Message? message = Message.JsonToMessage(message_str);
-            message.PrintConsole();
+            ThreadPool.QueueUserWorkItem(obj =>
+            {
+                Message? message = Message.JsonToMessage(message_str);
+                message?.PrintConsole();
+                byte[] reply = Encoding.UTF8.GetBytes("message has been received");
+                client.Send(reply);
+            });
         }
     }
 }
