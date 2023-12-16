@@ -4,7 +4,8 @@ using System.Text;
 using System;
 using System.Text.Json;
 
-Task.Run(() => ServerSend.Server());
+var vs = Task.Run(() => ServerSend.Server());
+Task.WaitAll(vs);
 
 
 void SentMessage(string text)
