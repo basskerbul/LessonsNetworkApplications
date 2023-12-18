@@ -30,6 +30,8 @@ class ServerSend
         UdpClient client = new UdpClient(1223);
         IPEndPoint point = new IPEndPoint(IPAddress.Any, 0);
         Console.WriteLine("I listen");
+        CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
+        CancellationToken token = cancelTokenSource.Token;
 
         while (true)
         {
@@ -41,7 +43,7 @@ class ServerSend
                 message?.PrintConsole();
                 byte[] reply = Encoding.UTF8.GetBytes("message has been received");
                 client.Send(reply);
-            });
+            }, token);
         }
     }
 }
